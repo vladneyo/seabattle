@@ -3,19 +3,12 @@ mod point;
 mod field;
 mod game;
 mod console;
+mod coord;
 
-use point::Point;
-use crate::display::Display;
-use crate::field::Field;
 use crate::game::Game;
+use point::Point;
 
 fn main() {
-    // println!("{:?}", p!(0));
-    // let u: u8 = p!('a').into();
-    // println!("{:?}", u);
-    //
-    // let c:char = p!('b').into();
-    // println!("{:?}", c);
-    let game = Game::new();
+    let mut game = Game::new();
     game.run();
 }
