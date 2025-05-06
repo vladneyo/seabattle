@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
 pub enum Point {
     Zero  = 0,
     One   = 1,
@@ -11,6 +11,10 @@ pub enum Point {
     Seven = 7,
     Eight = 8,
     Nine  = 9,
+}
+
+impl Point {
+    pub const MAX: u8 = 10;
 }
 
 impl From<Point> for u8 {
@@ -109,7 +113,7 @@ mod tests {
 
     #[test]
     fn u8_valid_bounds(){
-        let p = p!(3);
+        let p = p!(3u8);
 
         assert_eq!(p, Point::Three);
     }
@@ -117,7 +121,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn u8_invalid_bounds(){
-        let p = p!(10);
+        let p = p!(10u8);
     }
 
     #[test]
@@ -135,9 +139,9 @@ mod tests {
 
     #[test]
     fn convert_u8_to_point(){
-        let p:u8 = p!(0).into();
+        let p:u8 = p!(0u8).into();
 
-        assert_eq!(p, 0);
+        assert_eq!(p, 0u8);
     }
 
     #[test]

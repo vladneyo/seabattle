@@ -1,21 +1,29 @@
 use crate::console::Console;
 use crate::coord::Coord;
 use crate::display::Display;
-use crate::field::Field;
+use crate::field::{Field, SeaCell};
 use crate::read_line;
+use crate::ship_spawner::ShipSpawner;
 
 pub struct Game{
     display: Display,
-    user_field: Field,
-    enemy_field: Field,
+    user_field: Field<SeaCell>,
+    enemy_field: Field<SeaCell>,
     user_strike_history: Vec<Coord>,
     enemy_strike_history: Vec<Coord>,
 }
 impl Game {
-    pub fn new () -> Self {Self{
+    pub fn new () -> Self {
+        let mut spawner = ShipSpawner::new();
+        let mut user_field = Field::new();
+        let mut enemy_field = Field::new();
+        spawner.spawn(&mut user_field);
+        spawner.spawn(&mut enemy_field);
+
+        Self{
         display: Display::new(),
-        user_field: Field::new(),
-        enemy_field: Field::new(),
+        user_field,
+        enemy_field,
         user_strike_history: Vec::with_capacity(100),
         enemy_strike_history: Vec::with_capacity(100),
     }}

@@ -1,6 +1,6 @@
 use colored::Colorize;
 use crate::coord::Coord;
-use crate::field::Field;
+use crate::field::{Cell, Field};
 use crate::p;
 use crate::Point;
 
@@ -26,36 +26,33 @@ impl Display {
         print!("{}|", char::from(p!(row_i)));
     }
 
-    fn draw_empty_cell(){
+    pub fn draw_empty_cell(){
         print!("{}", "_|".blue());
     }
-    fn draw_miss_cell(){
+
+    pub fn draw_miss_cell(){
         print!("{}{}", "•".yellow(), "|".blue());
     }
 
-    fn draw_hit_cell(){
+    pub fn draw_hit_cell(){
         print!("{}{}", "X".custom_color((255, 165, 0)), "|".blue());
     }
 
-    fn draw_destoyed_cell(){
+    pub fn draw_destoyed_cell(){
         print!("{}{}", "X".red(), "|".blue());
     }
 
-    fn draw_ship_cell(){
+    pub fn draw_ship_cell(){
         print!("{}{}", "#", "|".blue());
     }
 
-    pub fn draw_grid(&self, field: &Field){
+    pub fn draw_grid<T>(&self, field: &Field<T>)
+    where T: Cell + Clone + Copy {
         Self::draw_header();
         for i in 0..field.grid.len() {
             Self::draw_row(i);
             for j in 0..field.grid[i].len() {
-                if field.grid[i][j]{
-                    Self::draw_empty_cell();
-                }
-                else {
-                    Self::draw_miss_cell();
-                }
+                field.grid[i][j].draw();
             }
             print!("\n");
 

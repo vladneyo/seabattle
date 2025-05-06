@@ -5,6 +5,29 @@ use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Coord(pub Point, pub Point);
+impl Coord{
+    pub fn new(x: u8, y: u8) -> Self {
+        Self{ 0: p!(x), 1: p!(y) }
+    }
+
+    pub fn max(c1: Self, c2: Self) -> Self {
+        if c1.0 > c2.0 || c1.1 > c2.1 {
+            c1
+        }
+        else {
+            c2
+        }
+    }
+
+    pub fn min(c1: Self, c2: Self) -> Self {
+        if c1.0 < c2.0 || c1.1 < c2.1 {
+            c1
+        }
+        else {
+            c2
+        }
+    }
+}
 
 impl TryFrom<(&char, &u8)> for Coord {
     type Error = String;
@@ -34,5 +57,52 @@ impl FromStr for Coord {
 impl Display for Coord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}-{}", <Point as Into<char>>::into(self.0), <Point as Into<u8>>::into(self.1))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::coord::Coord;
+
+    #[test]
+    fn max_correct(){
+        // c1 is righter
+        let c1 = Coord::new(3u8, 4u8);
+        let c2 = Coord::new(1u8, 4u8);
+
+        assert_eq!(Coord::max(c1, c2), Coord::new(3, 4));
+
+        // c1 is lower
+        let c1 = Coord::new(3u8, 5u8);
+        let c2 = Coord::new(3u8, 4u8);
+
+        assert_eq!(Coord::max(c1, c2), Coord::new(3, 5));
+
+        // c1 is lower and righter
+        let c1 = Coord::new(4u8, 5u8);
+        let c2 = Coord::new(3u8, 4u8);
+
+        assert_eq!(Coord::max(c1, c2), Coord::new(4, 5));
+    }
+
+    #[test]
+    fn min_correct(){
+        // c2 is lefter
+        let c1 = Coord::new(3u8, 4u8);
+        let c2 = Coord::new(1u8, 4u8);
+
+        assert_eq!(Coord::min(c1, c2), Coord::new(1, 4));
+
+        // c2 is higher
+        let c1 = Coord::new(3u8, 4u8);
+        let c2 = Coord::new(3u8, 2u8);
+
+        assert_eq!(Coord::min(c1, c2), Coord::new(3, 2));
+
+        // c2 is higher and lefter
+        let c1 = Coord::new(3u8, 4u8);
+        let c2 = Coord::new(1u8, 2u8);
+
+        assert_eq!(Coord::min(c1, c2), Coord::new(1, 2));
     }
 }
