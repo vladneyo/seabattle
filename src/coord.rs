@@ -4,8 +4,9 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Coord(pub Point, pub Point);
+pub struct Coord(pub Point, pub Point); // (row, column)
 impl Coord{
+    // (row, column)
     pub fn new(x: u8, y: u8) -> Self {
         Self{ 0: p!(x), 1: p!(y) }
     }

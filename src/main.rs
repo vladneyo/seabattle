@@ -6,6 +6,8 @@ mod console;
 mod coord;
 mod ship;
 mod ship_spawner;
+mod cell;
+mod matrix;
 
 use crate::game::Game;
 use point::Point;

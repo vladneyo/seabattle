@@ -14,7 +14,8 @@ pub enum Point {
 }
 
 impl Point {
-    pub const MAX: u8 = 10;
+    pub const MAX: u8 = 9;
+    pub const MIN: u8 = 0;
 }
 
 impl From<Point> for u8 {
@@ -121,7 +122,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn u8_invalid_bounds(){
-        let p = p!(10u8);
+        let _p = p!(10u8);
     }
 
     #[test]
@@ -134,7 +135,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn char_invalid_bounds(){
-        let p = p!('k');
+        let _p = p!('k');
     }
 
     #[test]

@@ -1,6 +1,7 @@
 use colored::Colorize;
+use crate::cell::Cell;
 use crate::coord::Coord;
-use crate::field::{Cell, Field};
+use crate::field::{Field};
 use crate::p;
 use crate::Point;
 
@@ -11,11 +12,11 @@ impl Display {
         Display {}
     }
 
-    pub fn draw_your_field(&self){
+    pub fn draw_your_field_label(&self){
         println!("------YOUR FIELD------");
     }
 
-    pub fn draw_enemy_field(&self){
+    pub fn draw_enemy_field_label(&self){
         println!("-----ENEMY FIELD------");
     }
     pub fn draw_header(){
@@ -46,8 +47,7 @@ impl Display {
         print!("{}{}", "#", "|".blue());
     }
 
-    pub fn draw_grid<T>(&self, field: &Field<T>)
-    where T: Cell + Clone + Copy {
+    pub fn draw_grid(&self, field: &Field) {
         Self::draw_header();
         for i in 0..field.grid.len() {
             Self::draw_row(i);
