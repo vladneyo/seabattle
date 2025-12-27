@@ -1,13 +1,13 @@
-mod display;
-mod point;
-mod field;
-mod game;
+mod cell;
 mod console;
 mod coord;
+mod display;
+mod field;
+mod game;
+mod matrix;
+mod point;
 mod ship;
 mod ship_spawner;
-mod cell;
-mod matrix;
 
 use crate::game::Game;
 use point::Point;

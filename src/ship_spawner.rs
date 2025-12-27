@@ -5,6 +5,11 @@ use crate::point::Point;
 use crate::ship::Ship;
 use rand::Rng;
 
+/// Handles the random generation and placement of ships on a Field.
+///
+/// Ensures that ships are placed within bounds and do not overlap or touch each other
+/// (maintaining a 1-cell buffer zone around every ship).
+#[allow(dead_code)]
 pub struct ShipSpawner {
     spawn_queue: Vec<(u8, u8)>,
     spawned_ships: Vec<Ship>,
@@ -18,42 +23,41 @@ impl ShipSpawner {
     }
 
     pub fn spawn(&mut self, field: &mut Field) {
-        // todo!("implement spawn")
-        let mut inter_matrix = Self::create_empty_matrix();
+        // `occupancy_matrix` stores ships + 1-cell padding around them to enforce spacing.
+        let mut occupancy_matrix = Matrix::create_empty_matrix();
         let mut rng = rand::rng();
         for i in 0..self.spawn_queue.len() {
             // number of ship types
             // println!("{:?}-block:", self.spawn_queue[i].0);
-            for j in 0..self.spawn_queue[i].1 {
+            for _j in 0..self.spawn_queue[i].1 {
                 // number of ships within type
                 loop {
-                    let s_x = rng.random_range(0..Point::MAX);
-                    let s_y = rng.random_range(0..Point::MAX);
+                    // NOTE: `random_range(0..Point::MAX)` is exclusive of MAX, so we use `..=`.
+                    let s_x = rng.random_range(0..=Point::MAX);
+                    let s_y = rng.random_range(0..=Point::MAX);
                     let start_coord = Coord::new(s_x, s_y);
 
                     let end_coord = Self::get_end_coord(start_coord, self.spawn_queue[i].0);
                     let candidate = Ship::new(self.spawn_queue[i].0, start_coord, end_coord);
 
-                    // place candidate on matrix
-                    let mut candidate_matrix = Self::create_empty_matrix();
+                    // place candidate footprint (no padding) for intersection check
+                    let mut candidate_matrix = Matrix::create_empty_matrix();
                     Matrix::place(
                         &mut candidate_matrix,
                         &candidate.start_coord,
                         &candidate.end_coord,
                     );
                     // Matrix::display(&candidate_matrix);
-                    // println!("{:?}", j);
 
-                    // check intersection
-                    if !Matrix::has_intersection(&inter_matrix, &candidate_matrix) {
-                        // if no intersection -> update matrix + update field
-                        // todo!("implement")
-                        Matrix::place(
-                            &mut inter_matrix,
+                    // reject candidate if it intersects any prior ship OR their 1-cell padded border
+                    if !Matrix::has_intersection(&occupancy_matrix, &candidate_matrix) {
+                        // accept: update padded occupancy matrix and place actual ship on the field
+                        Matrix::place_with_padding(
+                            &mut occupancy_matrix,
                             &candidate.start_coord,
                             &candidate.end_coord,
+                            1,
                         );
-
                         field.place(&candidate.start_coord, &candidate.end_coord);
 
                         break;
@@ -64,18 +68,23 @@ impl ShipSpawner {
         }
     }
 
-    fn create_empty_matrix() -> Vec<Vec<u8>> {
-        vec![vec![0u8; 10]; 10]
-    }
-
+    #[allow(dead_code)]
     fn place_ship(field: &mut Field, ship: &Ship) {
         field.occupy(ship);
     }
 
     pub fn get_end_coord(start_coord: Coord, length: u8) -> Coord {
-        let mut end_points = vec![];
+        let candidates = Self::get_all_valid_end_coords(start_coord, length);
+        let mut rng = rand::rng();
+        candidates[rng.random_range(0..candidates.len())]
+    }
 
+    /// Returns all valid end coordinates for a ship of `length` starting at `start_coord`.
+    /// This function is deterministic and used for testing ship placement logic.
+    pub fn get_all_valid_end_coords(start_coord: Coord, length: u8) -> Vec<Coord> {
+        let mut end_points = vec![];
         let end_length = length - 1;
+
         // check vertical down
         let end = start_coord.0 as u8 + end_length;
         if end <= Point::MAX {
@@ -100,10 +109,7 @@ impl ShipSpawner {
             end_points.push(Coord::new(start_coord.0 as u8, end as u8));
         }
 
-        let mut rng = rand::rng();
-
-        // get random direction's end coord
-        end_points[rng.random_range(0..end_points.len())]
+        end_points
     }
 }
 
@@ -113,27 +119,45 @@ mod tests {
     use crate::ship_spawner::ShipSpawner;
 
     #[test]
-    fn get_end_coord_zero_zero_four_down_or_right() {
+    fn get_all_valid_end_coords_corner_start() {
+        // Arrange
         let start = Coord::new(0, 0);
         let length = 4;
 
-        let end = ShipSpawner::get_end_coord(start, length);
+        // Act
+        let candidates = ShipSpawner::get_all_valid_end_coords(start, length);
 
-        assert!(end == Coord::new(0, 3) || end == Coord::new(3, 0));
+        // Assert: From (0,0) with length 4, we can only go Down (3,0) or Right (0,3).
+        // Vertical Up and Horizontal Left are out of bounds.
+        let expected = vec![
+            Coord::new(3, 0), // Down
+            Coord::new(0, 3), // Right
+        ];
+        // Order depends on implementation (Down, Right, Up, Left), so we check containment or sort.
+        // Implementation order: Down, Right.
+        assert_eq!(candidates, expected);
     }
 
     #[test]
-    fn get_end_coord_five_five_four_any() {
+    fn get_all_valid_end_coords_center_start() {
+        // Arrange
         let start = Coord::new(5, 5);
         let length = 4;
 
-        let end = ShipSpawner::get_end_coord(start, length);
-        println!("{:?}", end);
-        assert!(
-            end == Coord::new(5, 8)
-                || end == Coord::new(8, 5)
-                || end == Coord::new(2, 5)
-                || end == Coord::new(5, 2)
-        );
+        // Act
+        let candidates = ShipSpawner::get_all_valid_end_coords(start, length);
+
+        // Assert: From (5,5) with length 4, all 4 directions are valid.
+        // Down: (5+3, 5) -> (8, 5)
+        // Right: (5, 5+3) -> (5, 8)
+        // Up: (5-3, 5) -> (2, 5)
+        // Left: (5, 5-3) -> (5, 2)
+        let expected = vec![
+            Coord::new(8, 5), // Down
+            Coord::new(5, 8), // Right
+            Coord::new(2, 5), // Up
+            Coord::new(5, 2), // Left
+        ];
+        assert_eq!(candidates, expected);
     }
 }

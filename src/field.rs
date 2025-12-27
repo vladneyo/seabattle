@@ -35,7 +35,8 @@ impl Field {
         }
     }
 
-    pub fn occupy(&mut self, ship: &Ship) {
+    #[allow(dead_code)]
+    pub fn occupy(&mut self, _ship: &Ship) {
         println!("occupied")
 
         //ship.start_coord

@@ -3,16 +3,17 @@ use crate::display::Display;
 pub trait Cell: Clone + Copy + Default {
     fn on_strike(&mut self);
     fn draw(&self);
+    #[allow(dead_code)]
     fn is_hit(&self) -> bool;
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct SeaCell{
+pub struct SeaCell {
     hit: bool,
 }
-impl SeaCell{
-    fn new() -> SeaCell{
-        SeaCell{hit: false}
+impl SeaCell {
+    fn new() -> SeaCell {
+        SeaCell { hit: false }
     }
 }
 
@@ -22,35 +23,32 @@ impl Default for SeaCell {
     }
 }
 
-impl Cell for SeaCell{
+impl Cell for SeaCell {
     fn on_strike(&mut self) {
         self.hit = true;
     }
 
     fn draw(&self) {
-        if self.hit{
+        if self.hit {
             Display::draw_miss_cell()
-        }
-        else {
+        } else {
             Display::draw_empty_cell()
         }
     }
 
-    fn is_hit(&self) -> bool{
+    fn is_hit(&self) -> bool {
         self.hit
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct ShipPart{
+pub struct ShipPart {
     hit: bool,
 }
 
-impl ShipPart{
-    pub fn new() -> ShipPart{
-        ShipPart{
-            hit: false,
-        }
+impl ShipPart {
+    pub fn new() -> ShipPart {
+        ShipPart { hit: false }
     }
 }
 
@@ -60,19 +58,17 @@ impl Default for ShipPart {
     }
 }
 
-impl Cell for ShipPart{
+impl Cell for ShipPart {
     fn on_strike(&mut self) {
         self.hit = true;
     }
 
     fn draw(&self) {
-        if self.hit{
+        if self.hit {
             Display::draw_hit_cell();
-        }
-        else {
+        } else {
             Display::draw_ship_cell()
         }
-
     }
 
     fn is_hit(&self) -> bool {
@@ -87,27 +83,35 @@ pub enum FieldCell {
 }
 
 impl Default for FieldCell {
-    fn default() -> Self { FieldCell::Sea(SeaCell::default()) }
+    fn default() -> Self {
+        FieldCell::Sea(SeaCell::default())
+    }
 }
 
 impl Cell for FieldCell {
-    fn on_strike(&mut self) { match self {
-        FieldCell::Sea(c) => c.on_strike(),
-        FieldCell::Ship(c) => c.on_strike(),
-    }}
-    fn draw(&self) { match self {
-        FieldCell::Sea(c) => c.draw(),
-        FieldCell::Ship(c) => c.draw(),
-    }}
+    fn on_strike(&mut self) {
+        match self {
+            FieldCell::Sea(c) => c.on_strike(),
+            FieldCell::Ship(c) => c.on_strike(),
+        }
+    }
+    fn draw(&self) {
+        match self {
+            FieldCell::Sea(c) => c.draw(),
+            FieldCell::Ship(c) => c.draw(),
+        }
+    }
 
-    fn is_hit(&self) -> bool { match self {
-        FieldCell::Sea(c) => c.is_hit(),
-        FieldCell::Ship(c) => c.is_hit(),
-    }}
+    fn is_hit(&self) -> bool {
+        match self {
+            FieldCell::Sea(c) => c.is_hit(),
+            FieldCell::Ship(c) => c.is_hit(),
+        }
+    }
 }
 
 impl FieldCell {
-    pub fn to_u8(&self) -> u8 {
+    pub fn to_u8(self) -> u8 {
         match self {
             FieldCell::Sea(_) => 0,
             FieldCell::Ship(_) => 1,

@@ -10,6 +10,7 @@ pub struct Game {
     user_field: Field,
     enemy_field: Field,
     user_strike_history: Vec<Coord>,
+    #[allow(dead_code)]
     enemy_strike_history: Vec<Coord>,
 }
 impl Game {
